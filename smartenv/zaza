@@ -1,0 +1,58 @@
+if __name__ == "__main__":
+    # Initialize devices
+    devices = {
+        "living_room_light": SmartLight("living_room_light", "localhost"),
+        "main_thermostat": SmartThermostat("main_thermostat", "localhost"),
+        "kitchen_refrigerator": SmartRefrigerator("kitchen_refrigerator", "localhost"),
+        "basement_washer": SmartWasher("basement_washer", "localhost"),
+        "office_smartplug": SmartPlug("office_smartplug", "localhost")
+    }
+
+    try:
+        while True:
+            # Print available commands for the user
+            print("\nCommands:")
+            print("1. View device states")
+            print("2. Control devices (Example: turn ON living_room_light)")
+            print("3. Exit")
+
+            user_input = input("Enter command: ")
+
+            if user_input == "1":
+                # Fetch and display the state of all devices
+                for name, device in devices.items():
+                    if isinstance(device, SmartLight):
+                        print(f"{name} - Status: {device.status}, Brightness: {device.brightness}%, Color: {device.color}")
+                    elif isinstance(device, SmartThermostat):
+                        print(f"{name} - Status: {device.status}, Mode: {device.mode}, Current Temperature: {device.current_temperature}F, Desired Temperature: {device.desired_temperature}F")
+                    elif isinstance(device, SmartRefrigerator):
+                        door_status = "OPEN" if device.door_open else "CLOSED"
+                        print(f"{name} - Status: {device.status}, Temperature: {device.current_temperature}F, Door: {door_status}")
+                    elif isinstance(device, SmartWasher):
+                        print(f"{name} - Status: {device.status}, Cycle: {device.cycle_status}")
+                    elif isinstance(device, SmartPlug):
+                        print(f"{name} - Status: {device.status}")
+
+            elif user_input.startswith("turn"):
+                _, action, device_name = user_input.split()
+                device = devices.get(device_name)
+                if device:
+                    if action == "ON":
+                        device.turn_on()
+                    elif action == "OFF":
+                        device.turn_off()
+                else:
+                    print(f"No device named {device_name} found.")
+
+            elif user_input == "3":
+                print("Exiting program...")
+                break
+
+    except KeyboardInterrupt:
+        # Handle Ctrl+C for graceful shutdown
+        pass
+    finally:
+        # Cleanup: Ensure all devices are disconnected before exiting
+        for device in devices.values():
+            device.disconnect_from_broker()
+
